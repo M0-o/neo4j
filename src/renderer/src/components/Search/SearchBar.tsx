@@ -82,21 +82,15 @@ export function SearchBar({
   const { query, setQuery, results, loading, clear } = useSearch()
   const [isFocused, setIsFocused] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
-  const [lastResultsKey, setLastResultsKey] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
 
   const showDropdown = isFocused && query.trim().length > 0
 
-  // Create a stable key for current results to track changes
-  const resultsKey = results.map((r) => r.id).join(',')
-
-  // Reset selected index when results change - happens before render completes
-  if (resultsKey !== lastResultsKey) {
-    setLastResultsKey(resultsKey)
-    if (selectedIndex !== -1) {
-      setSelectedIndex(-1)
-    }
+  // Custom setter that resets selected index when query changes
+  const handleQueryChange = (newQuery: string): void => {
+    setQuery(newQuery)
+    setSelectedIndex(-1) // Reset selection when user types
   }
 
   const handleResultClick = (result: SearchResult): void => {
@@ -152,7 +146,7 @@ export function SearchBar({
           ref={inputRef}
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => handleQueryChange(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setTimeout(() => setIsFocused(false), 200)}
           onKeyDown={handleKeyDown}

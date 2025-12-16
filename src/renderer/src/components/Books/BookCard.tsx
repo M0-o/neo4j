@@ -87,7 +87,8 @@ export function BookCard({
           variants={imageVariants}
           loading="lazy"
           onError={(e) => {
-            ;(e.target as HTMLImageElement).src = placeholderCover
+            const target = e.currentTarget
+            target.src = placeholderCover
           }}
         />
 

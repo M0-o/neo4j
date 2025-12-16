@@ -1,7 +1,29 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Settings, Palette, Bell, Database, Info } from 'lucide-react'
+import { Settings, Palette, Bell, Database, Info, Check, AlertCircle } from 'lucide-react'
 
 export function SettingsPage(): React.JSX.Element {
+  const [seedStatus, setSeedStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+
+  const handleSeedDatabase = async (): Promise<void> => {
+    if (!window.api?.db?.seed) {
+      setSeedStatus('error')
+      return
+    }
+
+    setSeedStatus('loading')
+    try {
+      await window.api.db.seed()
+      setSeedStatus('success')
+      // Reset status after 3 seconds
+      setTimeout(() => setSeedStatus('idle'), 3000)
+    } catch {
+      setSeedStatus('error')
+      // Reset status after 3 seconds
+      setTimeout(() => setSeedStatus('idle'), 3000)
+    }
+  }
+
   return (
     <div className="min-h-full px-8 py-6">
       {/* Header */}
@@ -127,14 +149,25 @@ export function SettingsPage(): React.JSX.Element {
             </div>
 
             <button
-              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] py-2 text-sm text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-surface-hover)]"
-              onClick={() => {
-                if (window.api?.db?.seed) {
-                  window.api.db.seed()
-                }
-              }}
+              className={`flex w-full items-center justify-center gap-2 rounded-lg border py-2 text-sm transition-colors ${
+                seedStatus === 'success'
+                  ? 'border-[var(--color-rating-high)] bg-[var(--color-rating-high)]/10 text-[var(--color-rating-high)]'
+                  : seedStatus === 'error'
+                    ? 'border-[var(--color-rating-low)] bg-[var(--color-rating-low)]/10 text-[var(--color-rating-low)]'
+                    : 'border-[var(--color-border)] bg-[var(--color-surface-elevated)] text-[var(--color-text-primary)] hover:bg-[var(--color-surface-hover)]'
+              }`}
+              onClick={handleSeedDatabase}
+              disabled={seedStatus === 'loading'}
             >
-              Seed Sample Data
+              {seedStatus === 'loading' && (
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              )}
+              {seedStatus === 'success' && <Check className="h-4 w-4" />}
+              {seedStatus === 'error' && <AlertCircle className="h-4 w-4" />}
+              {seedStatus === 'idle' && 'Seed Sample Data'}
+              {seedStatus === 'loading' && 'Seeding...'}
+              {seedStatus === 'success' && 'Database Seeded!'}
+              {seedStatus === 'error' && 'Seed Failed'}
             </button>
           </div>
         </motion.section>

@@ -142,7 +142,8 @@ export function BookDetailModal({
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.1, duration: 0.3 }}
                   onError={(e) => {
-                    ;(e.target as HTMLImageElement).src = placeholderCover
+                    const target = e.currentTarget
+                    target.src = placeholderCover
                   }}
                 />
               </div>
